@@ -1,0 +1,35 @@
+{
+  "name": "life-sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Симулятор одной человеческой жизни с душой: Vite + TypeScript, DOM и Canvas",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:vk": "vite --mode vk-dev",
+    "build": "vite build",
+    "build:vk": "vite build --mode vk --outDir dist-vk",
+    "build:pages": "node scripts/build-pages.mjs",
+    "check:vk": "node scripts/check-vk.mjs dist-pages/vk",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "validate:content": "node scripts/validate-content.ts",
+    "sim:lives": "node scripts/sim-lives.ts",
+    "e2e": "playwright test",
+    "verify": "node scripts/verify.mjs",
+    "verify:fast": "node scripts/verify.mjs --fast"
+  },
+  "dependencies": {
+    "@vkontakte/vk-bridge": "3.0.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.5",
+    "typescript": "7.0.2",
+    "vite": "8.3.2",
+    "vitest": "5.0.3"
+  }
+}

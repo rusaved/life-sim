@@ -1,4 +1,11 @@
 node_modules/
 dist/
+dist-*/
+.vite/
+.cache/
+test-results/
+playwright-report/
+*.log
+.DS_Store
 .env
 .env.*

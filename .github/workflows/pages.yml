@@ -1,0 +1,74 @@
+# Ссылка продюсера: GitHub Pages.
+# Сборка: npm run build:pages — сайт в корне, сборка VK и ОК в vk/.
+# Итог: `gh run list --workflow pages.yml --limit 1`, ссылка обновилась, если job deploy — success.
+# Новый push отменяет незаконченный запуск (concurrency ниже): статус cancelled — не ошибка, смотри следующий запуск.
+# Нужно один раз: Settings → Pages → Build and deployment → Source: GitHub Actions.
+
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: check
+        name: Check build:pages script
+        run: |
+          if [ -f package-lock.json ] && grep -q '"build:pages"' package.json; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::package-lock.json or build:pages is missing, publishing skipped"
+          fi
+
+      - if: steps.check.outputs.ready == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - if: steps.check.outputs.ready == 'true'
+        run: npm ci
+
+      - if: steps.check.outputs.ready == 'true'
+        run: npm run build:pages
+        env:
+          BUILD_SHA: ${{ github.sha }}
+
+      - if: steps.check.outputs.ready == 'true'
+        uses: actions/configure-pages@v6
+
+      - if: steps.check.outputs.ready == 'true'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist-pages
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
