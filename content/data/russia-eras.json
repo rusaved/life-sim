@@ -1,0 +1,202 @@
+{
+ "eras": [
+  {
+   "year": 1900,
+   "lifeExp": {
+    "all": 30.5,
+    "male": 29.4,
+    "female": 31.7
+   },
+   "infantMort": 298.8,
+   "urbanShare": 15,
+   "capitalShare": 3.5,
+   "literacy": 21.1,
+   "birthsPerYear": 3500000,
+   "notes": "ОПЖ за 1896–97, 50 губ. Европ. России. Младенческая смертность за 1901 (пересчёт Андреева). Городская доля 15% (14,7% в совр. границах; tochno.st пишет 12%). Рождения — оценка 52‰ × 67,5 млн. Грамотность 21,1% — вся империя, не проверено.",
+   "sources": [
+    "https://rosstat.gov.ru/bgd/regl/b07_13/isswww.exe/stg/d01/04-23.htm",
+    "https://www.demoscope.ru/weekly/2003/0125/analit02.php",
+    "https://rosstat.gov.ru/bgd/regl/b11_13/IssWWW.exe/Stg/d1/04-02.htm",
+    "https://tochno.st/materials/my-izucili-istoriceskuiu-statistiku-rossii-s-konca-1890-x-godov-vot-sem-grafikov-o-tom-kak-xx-vek-izmenil-stranu"
+   ],
+   "flags": {
+    "lifeExp": "ok",
+    "infantMort": "ok",
+    "urbanShare": "ok",
+    "capitalShare": "est",
+    "literacy": "unv",
+    "birthsPerYear": "est"
+   }
+  },
+  {
+   "year": 1920,
+   "lifeExp": {
+    "all": 35.8,
+    "male": 33.7,
+    "female": 37.9
+   },
+   "infantMort": 205,
+   "urbanShare": 17.7,
+   "capitalShare": 3.9,
+   "literacy": 51.1,
+   "birthsPerYear": 4688000,
+   "notes": "Данных за 1920 нет, взяты 1926–27. ОПЖ — поправка АДХ за 1927. Официально (европейская часть РСФСР, 1926–27): 42,9/40,2/45,6. «all» — простое среднее, оценка. Младенческая смертность и рождения — за 1927. Грамотность 51,1% — 1926, возраст 9+, весь СССР. Доля столиц — расчёт потока 1, входные числа не проверены.",
+   "sources": [
+    "https://ru.wikipedia.org/wiki/Население_России",
+    "https://rosstat.gov.ru/bgd/regl/b07_13/isswww.exe/stg/d01/04-23.htm",
+    "https://www.demoscope.ru/weekly/2003/0125/analit02.php",
+    "https://rosstat.gov.ru/free_doc/new_site/perepis2010/croc/documents/portret-russia.pdf",
+    "https://en.wikipedia.org/wiki/1939_Soviet_census"
+   ],
+   "flags": {
+    "lifeExp": "alt (all=est)",
+    "infantMort": "alt (1927)",
+    "urbanShare": "alt (1926)",
+    "capitalShare": "unv",
+    "literacy": "alt (1926, СССР)",
+    "birthsPerYear": "alt (1927)"
+   }
+  },
+  {
+   "year": 1940,
+   "lifeExp": {
+    "all": 38.8,
+    "male": 35.7,
+    "female": 41.9
+   },
+   "infantMort": 205,
+   "urbanShare": 33.5,
+   "capitalShare": 6.8,
+   "literacy": 81.2,
+   "birthsPerYear": 3814000,
+   "notes": "ОПЖ по АДХ за 1940; «all» — простое среднее, оценка. Официально 1938–39: 40,4/46,7; с поправкой 33,3/42,6. Городская доля — перепись 1939. Доля столиц — оценка: у потока 1 вероятная опечатка по Ленинграду. Грамотность 81,2% — 1939, возраст 9+, весь СССР. Ребёнок 1940 года рождения сразу попадает в войну.",
+   "sources": [
+    "https://www.demoscope.ru/weekly/2003/0131/analit05.php",
+    "https://ecfor.ru/wp-content/uploads/books/proh04/gl_04.pdf",
+    "https://www.demoscope.ru/weekly/2016/0689/analit01.php",
+    "https://ru.wikipedia.org/wiki/Население_России",
+    "https://rosstat.gov.ru/free_doc/new_site/perepis2010/croc/documents/portret-russia.pdf",
+    "https://en.wikipedia.org/wiki/1939_Soviet_census"
+   ],
+   "flags": {
+    "lifeExp": "ok (all=est)",
+    "infantMort": "ok",
+    "urbanShare": "alt (1939)",
+    "capitalShare": "est",
+    "literacy": "alt (1939, СССР)",
+    "birthsPerYear": "ok (вторичный)"
+   }
+  },
+  {
+   "year": 1960,
+   "lifeExp": {
+    "all": 67.9,
+    "male": 63.0,
+    "female": 71.5
+   },
+   "infantMort": 36.6,
+   "urbanShare": 52.2,
+   "capitalShare": 7.2,
+   "literacy": 98.5,
+   "birthsPerYear": 2782353,
+   "notes": "ОПЖ за 1958–59 (Росстат); годовое за 1960 — 68,7/63,7/72,3 (вторичный). Городская доля — перепись 1959. Грамотность 98,5% — возраст 9–49, 1959, вторичный, не проверено. Доля столиц — оценка по числам потока 1.",
+   "sources": [
+    "https://rosstat.gov.ru/bgd/regl/b07_13/isswww.exe/stg/d01/04-23.htm",
+    "https://rosstat.gov.ru/bgd/regl/B09_16/IssWWW.exe/Stg/02-01.htm",
+    "https://rosstat.gov.ru/free_doc/new_site/perepis2010/croc/documents/portret-russia.pdf"
+   ],
+   "flags": {
+    "lifeExp": "alt (1958–59)",
+    "infantMort": "ok",
+    "urbanShare": "alt (1959)",
+    "capitalShare": "est",
+    "literacy": "unv",
+    "birthsPerYear": "ok"
+   }
+  },
+  {
+   "year": 1980,
+   "lifeExp": {
+    "all": 67.5,
+    "male": 61.5,
+    "female": 73.0
+   },
+   "infantMort": 22.1,
+   "urbanShare": 69.1,
+   "capitalShare": 9.1,
+   "literacy": 99.7,
+   "birthsPerYear": 2202779,
+   "notes": "ОПЖ за 1979–80 (Росстат, ежегодник 2009); 1978–79 — 67,7/61,7/73,1. Городская доля — перепись 1979. Грамотность 99,7% — оценка по памяти 🧠. Доля столиц — оценка.",
+   "sources": [
+    "https://rosstat.gov.ru/bgd/regl/B09_16/IssWWW.exe/Stg/02-09.htm",
+    "https://rosstat.gov.ru/bgd/regl/B09_16/IssWWW.exe/Stg/02-01.htm",
+    "https://rosstat.gov.ru/free_doc/new_site/perepis2010/croc/documents/portret-russia.pdf"
+   ],
+   "flags": {
+    "lifeExp": "alt (1979–80)",
+    "infantMort": "ok",
+    "urbanShare": "alt (1979)",
+    "capitalShare": "est",
+    "literacy": "est",
+    "birthsPerYear": "ok"
+   }
+  },
+  {
+   "year": 2000,
+   "lifeExp": {
+    "all": 65.3,
+    "male": 59.0,
+    "female": 72.3
+   },
+   "infantMort": 15.3,
+   "urbanShare": 73.3,
+   "capitalShare": 10.4,
+   "literacy": 99.4,
+   "birthsPerYear": 1266800,
+   "notes": "Городская доля — перепись 2002. Грамотность 99,4% — оценка по памяти 🧠. Доля столиц — оценка по переписи 2002.",
+   "sources": [
+    "https://rosstat.gov.ru/bgd/regl/b07_13/isswww.exe/stg/d01/04-23.htm",
+    "https://rosstat.gov.ru/bgd/regl/B09_16/IssWWW.exe/Stg/02-01.htm",
+    "https://www.demoscope.ru/weekly/2025/01093/barom01.php"
+   ],
+   "flags": {
+    "lifeExp": "ok",
+    "infantMort": "ok",
+    "urbanShare": "alt (2002)",
+    "capitalShare": "est",
+    "literacy": "est",
+    "birthsPerYear": "ok"
+   }
+  },
+  {
+   "year": 2020,
+   "lifeExp": {
+    "all": 71.6,
+    "male": 66.7,
+    "female": 76.4
+   },
+   "infantMort": 4.5,
+   "urbanShare": 74.8,
+   "capitalShare": 12.6,
+   "literacy": 99.7,
+   "birthsPerYear": 1435800,
+   "notes": "ОПЖ после пересчёта по переписи. Первая оценка: 71,54. Рождения — оперативные данные Росстата. Городская доля и доля столиц — перепись 2021. Грамотность 99,7% — оценка по памяти 🧠.",
+   "sources": [
+    "https://www.demoscope.ru/weekly/2025/01059/biblio04.php",
+    "https://www.demoscope.ru/weekly/2025/01069/barom04.php",
+    "https://www.demoscope.ru/weekly/2023/0981/barom05.php",
+    "https://rosstat.gov.ru/storage/mediabank/GmgstsaS/demograf-12.pdf",
+    "https://rosstat.gov.ru/folder/313/document/166784",
+    "https://ru.wikipedia.org/wiki/Всероссийская_перепись_населения_(2020—2021)"
+   ],
+   "flags": {
+    "lifeExp": "ok (all≈)",
+    "infantMort": "ok",
+    "urbanShare": "alt (2021)",
+    "capitalShare": "ok",
+    "literacy": "est",
+    "birthsPerYear": "ok (оперативные)"
+   }
+  }
+ ]
+}
