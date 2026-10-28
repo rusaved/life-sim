@@ -160,7 +160,7 @@ export function rememberLife(soul: Soul, life: Life, s: LifeSummary): Soul {
 /** Строка мемориала: «Россия, село, 1940-е, 71 год». */
 export function lifeLineText(line: LifeLine, index: number): string {
   const tpl = content.soul.soulLines.life[index % content.soul.soulLines.life.length]!;
-  return gender(fill(tpl, { place: line.place, era: line.era, ...agePair(line.age), life: line.lifeShort }), line.sex);
+  return capitalize(gender(fill(tpl, { place: line.place, era: line.era, ...agePair(line.age), life: line.lifeShort }), line.sex));
 }
 
 /** Черты души для показа: имя и сила (×2, ×3). */
@@ -177,13 +177,15 @@ export function traitList(soul: Soul): Array<{ trait: Trait; count: number }> {
 export function deathPost(life: Life, s: LifeSummary, variant: number): string {
   let list = content.soul.shareTexts.death;
   if (s.age < 1) list = list.filter((t) => !t.includes('до {age}'));
-  const tpl = list[variant % list.length]!;
-  const vars = { place: s.place, era: s.era, ...agePair(s.age), cause: s.cause, soul: s.trait.name.toLowerCase(), life: s.lifeShort, trait: s.trait.name, tag: content.brand.hashtag };
-  return gender(fill(tpl, vars), life.birth.sex);
+  // «до 91 года», «до 87 лет»: после «до» — родительный падеж.
+  const tpl = list[variant % list.length]!.replace('до {age} {years}', 'до {age} {gen}');
+  const gen = s.age % 10 === 1 && s.age % 100 !== 11 ? 'года' : 'лет';
+  const vars = { gen, place: s.place, era: s.era, ...agePair(s.age), cause: s.cause, soul: s.trait.name.toLowerCase(), life: s.lifeShort, trait: s.trait.name, tag: content.brand.hashtag };
+  return capitalize(gender(fill(tpl, vars), life.birth.sex));
 }
 
 export function birthPost(life: Life, variant: number): string {
   const list = content.soul.shareTexts.birth;
   const tpl = list[variant % list.length]!;
-  return gender(fill(tpl, { place: placeName(life.birth), era: eraName(life.birth), tag: content.brand.hashtag }), life.birth.sex);
+  return capitalize(gender(fill(tpl, { place: placeName(life.birth), era: eraName(life.birth), tag: content.brand.hashtag }), life.birth.sex));
 }
