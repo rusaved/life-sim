@@ -33,13 +33,19 @@ export async function liveToEnd(page: Page): Promise<number> {
     if (await choice.isVisible()) {
       await choice.click();
       decisions++;
-    } else await page.waitForTimeout(60);
+    } else {
+      // Касание скорости между годами: так же ловится миг смерти (раньше таймер итога снимался и экран застывал).
+      await page.locator('[data-speed="16"]').click({ timeout: 2_000 }).catch(() => {});
+      await page.waitForTimeout(40);
+    }
   }
   throw new Error('жизнь не закончилась');
 }
 
 /** Ничего шире экрана; касания от 44 px; шрифт от 14 px у видимого текста. */
 export async function checkLayout(page: Page, where: string): Promise<void> {
+  // Касания меряются без трансформаций (нажатая кнопка чуть сжимается), анимации появления успевают закончиться.
+  await page.waitForTimeout(350);
   const r = await page.evaluate(() => {
     const vw = window.innerWidth;
     const wide: string[] = [];
@@ -50,7 +56,7 @@ export async function checkLayout(page: Page, where: string): Promise<void> {
       if (!box.width || !box.height || getComputedStyle(el).visibility === 'hidden') continue;
       if (el.closest('.sheet-back') && !document.querySelector('.sheet-back')) continue;
       if (box.right > vw + 1 || box.left < -1) wide.push(`${el.tagName}.${el.className} ${Math.round(box.left)}..${Math.round(box.right)}`);
-      if ((el.tagName === 'BUTTON' || el.tagName === 'SUMMARY') && (box.height < 44 || box.width < 44)) small.push(`${el.textContent?.slice(0, 20)} ${Math.round(box.width)}×${Math.round(box.height)}`);
+      if ((el.tagName === 'BUTTON' || el.tagName === 'SUMMARY') && (el.offsetHeight < 44 || el.offsetWidth < 44)) small.push(`${el.textContent?.slice(0, 20)} ${el.offsetWidth}×${el.offsetHeight}`);
       const own = Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent!.trim());
       if (own && parseFloat(getComputedStyle(el).fontSize) < 14) tiny.push(`${el.tagName} «${el.textContent?.slice(0, 20)}» ${getComputedStyle(el).fontSize}`);
     }

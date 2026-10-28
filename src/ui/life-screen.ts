@@ -173,9 +173,11 @@ export function showLife(): void {
   }
 
   function schedule(): void {
+    // После смерти таймер ведёт к итогу — его не трогаем (иначе касание скорости в этот миг оставляло экран навсегда).
+    if (life!.death) return;
     if (timer) clearTimeout(timer);
     timer = 0;
-    if (life!.death || card) return;
+    if (card) return;
     if (life!.pending) return decisionCard();
     timer = window.setTimeout(tick, skipping ? SKIP_MS : YEAR_MS[speed]);
   }

@@ -159,7 +159,9 @@ export function rememberLife(soul: Soul, life: Life, s: LifeSummary): Soul {
 
 /** Строка мемориала: «Россия, село, 1940-е, 71 год». */
 export function lifeLineText(line: LifeLine, index: number): string {
-  const tpl = content.soul.soulLines.life[index % content.soul.soulLines.life.length]!;
+  // Одна форма для всех строк мемориала: так список читается ровно.
+  const tpl = content.soul.soulLines.life[0]!;
+  void index;
   return capitalize(gender(fill(tpl, { place: line.place, era: line.era, ...agePair(line.age), life: line.lifeShort }), line.sex));
 }
 

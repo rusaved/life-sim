@@ -582,8 +582,17 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  animation: rise 0.28s ease-out both;
+  animation: lift 0.18s ease-out both;
   z-index: 5;
+}
+
+@keyframes lift {
+  from {
+    transform: translateY(16px);
+  }
+  to {
+    transform: none;
+  }
 }
 
 @keyframes rise {
@@ -702,7 +711,7 @@ textarea {
 }
 
 .preview canvas {
-  height: min(38vh, 340px);
+  height: min(48vh, 440px);
   width: auto;
   max-width: 100%;
   border-radius: 10px;

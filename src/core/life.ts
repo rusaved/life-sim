@@ -373,8 +373,9 @@ export function replay(birth: Birth, bias: Scales, actions: string): Life {
 export function mainEvents(life: Life, n = 6): LogEntry[] {
   return life.log
     .filter((e) => e.kind !== 'quiet' && e.weight > 0)
-    .map((e, i) => ({ e, i }))
-    .sort((x, y) => y.e.weight - x.e.weight || x.i - y.i)
+    // Выборы игрока и семья важнее случившегося само по себе.
+    .map((e, i) => ({ e, i, w: e.weight * (e.kind === 'event' ? 0.6 : 1) }))
+    .sort((x, y) => y.w - x.w || x.i - y.i)
     .slice(0, n)
     .sort((x, y) => x.i - y.i)
     .map((x) => x.e);
