@@ -9,7 +9,8 @@ import { ICONS, h, iconButton, mount } from './dom.ts';
 export function showAbout(back: () => void): void {
   const a = content.life.about;
   const w = content.world;
-  const years = [...new Set(Object.entries(w.years).filter(([k]) => k !== 'literacy').flatMap(([, v]) => v))].sort().join('–');
+  const main = ['cbr', 'pop', 'lifeExp', 'infantMort', 'under5Mort', 'urban'].flatMap((k) => w.years[k] ?? []).map(Number);
+  const years = `${Math.min(...main)}–${Math.max(...main)}`;
   const screen = h(
     'section',
     { class: 'screen', dataset: { screen: 'about' } },
