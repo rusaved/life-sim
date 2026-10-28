@@ -254,12 +254,10 @@ button {
 }
 
 .label {
-  position: absolute;
-  left: 16px;
-  bottom: max(4px, env(safe-area-inset-bottom));
+  margin-top: 8px;
+  padding-bottom: 4px;
   font-size: 14px;
-  color: rgba(169, 157, 140, 0.45);
-  pointer-events: none;
+  color: rgba(169, 157, 140, 0.5);
 }
 
 /* Душа */
@@ -569,7 +567,7 @@ textarea {
   flex: 0 0 52px;
 }
 
-.decision {
+.ask {
   position: absolute;
   left: 12px;
   right: 12px;
@@ -599,13 +597,13 @@ textarea {
   }
 }
 
-.decision .q {
+.ask .q {
   font-family: var(--serif);
   font-size: 19px;
   line-height: 1.3;
 }
 
-.decision .when {
+.ask .when {
   color: var(--muted);
   font-size: 14px;
 }
@@ -747,7 +745,7 @@ textarea {
     padding-left: 24px;
     padding-right: 24px;
   }
-  .decision {
+  .ask {
     left: 24px;
     right: 24px;
   }
@@ -763,7 +761,7 @@ textarea {
   .age {
     font-size: 26px;
   }
-  .decision .q {
+  .ask .q {
     font-size: 17px;
   }
 }

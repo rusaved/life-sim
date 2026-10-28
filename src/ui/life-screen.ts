@@ -131,7 +131,7 @@ export function showLife(): void {
     const labels = e ? e.choices.map((c) => c.label) : pause ? pause.answers : cross!.options.map((o) => o.label);
     card = h(
       'div',
-      { class: 'decision', role: 'dialog', 'aria-label': question, dataset: { decision: pause ? 'pause' : cross ? 'crossroad' : 'event' } },
+      { class: 'ask', role: 'dialog', 'aria-label': question, dataset: { decision: pause ? 'pause' : cross ? 'crossroad' : 'event' } },
       h('div', { class: 'when', text: pause ? `${ui.pauseTitle} · ${p.age} ${p.years}` : `${p.age} ${p.years} · ${yearOf(life!)}` }),
       h('div', { class: 'q', text: gender(question, sex) }),
       ...labels.map((label, i) =>

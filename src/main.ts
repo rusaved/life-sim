@@ -27,6 +27,12 @@ async function boot(): Promise<void> {
       /* приватный режим */
     }
   }
+  // ?fresh=1 срабатывает один раз: после перезагрузки сохранение живёт.
+  if (params.has('fresh')) {
+    const url = new URL(location.href);
+    url.searchParams.delete('fresh');
+    history.replaceState(null, '', url);
+  }
   app.platform = await loadPlatform();
   await app.platform.init();
   app.save = (params.get('fresh') === '1' ? null : decodeSave(await app.platform.load())) ?? freshSave();

@@ -110,6 +110,9 @@ export function showSoul(): void {
     sfx.tap();
     const seed = app.sharedSeed!;
     app.sharedSeed = null;
+    const url = new URL(location.href);
+    url.searchParams.delete('s');
+    history.replaceState(null, '', url);
     go.birth(seedMode(seed), seed);
   });
   sameBtn.dataset.action = 'born-same';
@@ -158,7 +161,7 @@ export function showSoul(): void {
     );
     body.append(codeBox());
   }
-  if (__BUILD_LABEL__) screen.append(h('div', { class: 'label', text: __BUILD_LABEL__ }));
+  if (__BUILD_LABEL__) body.append(h('div', { class: 'label', text: __BUILD_LABEL__ }));
   mount(screen);
 }
 
