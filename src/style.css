@@ -772,3 +772,9 @@ textarea {
     transition: none !important;
   }
 }
+
+/* В листе ничего не сжимается: на низком экране он прокручивается, а не мнёт кнопки. */
+.sheet > *,
+.screen .scroll > * {
+  flex-shrink: 0;
+}
