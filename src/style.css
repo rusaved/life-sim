@@ -775,6 +775,95 @@ textarea {
   }
 }
 
+/* Телефон боком: экран жизни в две колонки (слева возраст, шкалы и лента, справа управление и вопрос со всеми ответами),
+   лист «Поделиться» — картинка слева, кнопки справа; ничего не прокручивается и не уходит за край. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .screen {
+    padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  .screen[data-screen='life'] {
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: 20px;
+  }
+  [data-screen='life'] .life-head {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  [data-screen='life'] .scales {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 6px 0 4px;
+  }
+  [data-screen='life'] .feed {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  [data-screen='life'] .controls {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    align-self: end;
+    border-top: 0;
+    padding-top: 0;
+  }
+  .age {
+    font-size: 22px;
+  }
+  .ask {
+    left: calc(50% + 10px);
+    right: max(16px, env(safe-area-inset-right));
+    top: max(8px, env(safe-area-inset-top));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    max-height: none;
+    padding: 10px 12px;
+    gap: 6px;
+    justify-content: center;
+  }
+  /* Возраст и год видны слева, в карточке вопроса они лишние. */
+  .ask .when {
+    display: none;
+  }
+  .ask .q {
+    font-size: 16px;
+  }
+  .choice {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 15px;
+  }
+  .sheet {
+    max-width: 920px;
+    border-radius: 16px 16px 0 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 6px;
+    align-content: center;
+    overflow: hidden;
+    padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  .sheet > * {
+    grid-column: 2;
+  }
+  .sheet > .preview {
+    grid-column: 1;
+    grid-row: 1 / span 6;
+    align-self: center;
+  }
+  .sheet > p {
+    display: none;
+  }
+  .sheet .btn {
+    min-height: 44px;
+    padding: 8px 14px;
+  }
+  .preview canvas {
+    height: min(calc(100dvh - 24px), 380px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
