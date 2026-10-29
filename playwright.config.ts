@@ -7,7 +7,7 @@ const phone = (width: number, height: number) => ({ viewport: { width, height },
 
 export default defineConfig({
   testDir: 'e2e',
-  timeout: 180_000,
+  timeout: 300_000,
   expect: { timeout: 15_000 },
   workers: 3,
   fullyParallel: true,

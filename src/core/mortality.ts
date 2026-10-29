@@ -55,7 +55,9 @@ export function hazard(birth: Birth, agingBase: number, age: number): HazardPart
     const q = Math.min(0.9, birth.childMort / 1000 / (1 - birth.infantMort / 1000));
     infancy = -Math.log(Math.pow(1 - q, 1 / 4));
   }
-  return { infancy, accident: age >= 1 ? accidentRate(birth.lifeExp) : 0, aging: agingBase * Math.exp(AGING_RATE * age), ...extra };
+  // До 2 лет риск — только младенческая и детская смертность из данных: войны, голод и болезни этих лет в ней уже есть.
+  if (age < 2) return { infancy, accident: age >= 1 ? accidentRate(birth.lifeExp) : 0, aging: 0, war: 0, famine: 0 };
+  return { infancy, accident: accidentRate(birth.lifeExp), aging: agingBase * Math.exp(AGING_RATE * age), ...extra };
 }
 
 export function totalHazard(p: HazardParts): number {

@@ -1,8 +1,12 @@
 // Что: ядро одной жизни — год за годом: шкалы плывут, случай решает, жив ли человек, приходят события, решения, паузы и семья.
 // Кто зовёт: интерфейс (src/ui/life-screen.ts), scripts/sim-lives.ts (бот), tests/life.test.ts.
-// Держать: чистая логика без DOM; всё, что сделал игрок, пишется в actions — по ним жизнь повторяется точно (сохранение, «Продолжить»).
+// Первый вопрос приходит в нулевой год до броска смерти; первая жизнь новой души доживает до паузы в 5 лет; события, паузы и вопросы
+// перекрёстков прошлой жизни этой души не повторяются, пока есть из чего выбрать.
+// Держать: чистая логика без DOM; всё, что сделал игрок, пишется в actions — по ним жизнь повторяется точно (сохранение, «Продолжить»),
+// если те же LifeOptions (они берутся из души, а душа до смерти не меняется).
 
 import { content, eventTags, type Pause } from './data.ts';
+import { landMismatch, landOf } from './land.ts';
 import { calibrateAging, hardYear, hazard, personalFactor } from './mortality.ts';
 import { makeRng, next, pick, weighted, type Rng } from './rng.ts';
 import { gender } from './text.ts';
@@ -21,7 +25,16 @@ export interface LogEntry {
   weight: number;
 }
 
-export type Pending = { kind: 'event'; id: string } | { kind: 'pause'; index: number } | { kind: 'crossroad'; age: number };
+export type Pending = { kind: 'event'; id: string; early?: boolean } | { kind: 'pause'; index: number } | { kind: 'crossroad'; age: number; variant: number };
+
+/** Что жизнь берёт от души: первая ли это жизнь и что было в прошлой (не повторять). */
+export interface LifeOptions {
+  firstLife?: boolean;
+  avoid?: readonly string[];
+}
+
+/** Первая жизнь новой души не кончается раньше паузы в 5 лет: игрок успевает выбрать и подумать. */
+export const FIRST_LIFE_SAFE_AGE = 5;
 
 export interface LifeFlags {
   partner: boolean;
@@ -44,7 +57,13 @@ export interface Life {
   place: Place;
   scales: Scales;
   focus: FocusId | null;
+  /** Показанные события, паузы (pause:N) и вопросы перекрёстков (cross:возраст:N) — душа помнит их до следующей жизни. */
   used: string[];
+  avoid: ReadonlySet<string>;
+  /** До этого возраста включительно смерти нет (первая жизнь новой души), иначе −1. */
+  safeAge: number;
+  /** Вопрос нулевого года уже был (или его не нашлось). */
+  opened: boolean;
   flags: LifeFlags;
   decisions: number;
   log: LogEntry[];
@@ -70,14 +89,18 @@ interface CrossroadOption {
   result: string;
   effect: Partial<Scales>;
 }
-const CROSSROADS = content.life.crossroads as { ages: number[]; questions: Record<string, string>; options: Record<FocusId, CrossroadOption> };
+const CROSSROADS = content.life.crossroads as { ages: number[]; questions: Record<string, string[]>; options: Record<FocusId, CrossroadOption> };
+
+function crossroadQuestion(age: number, variant: number): string {
+  return CROSSROADS.questions[String(age)]?.[variant] ?? '';
+}
 
 /** Перекрёсток: вопрос о ближайших годах и варианты-направления (работа — с 14 лет). */
 export function pendingCrossroad(life: Life): { question: string; options: Array<{ focus: FocusId } & CrossroadOption> } | null {
   if (life.pending?.kind !== 'crossroad') return null;
   const age = life.pending.age;
   return {
-    question: CROSSROADS.questions[String(age)] ?? '',
+    question: crossroadQuestion(age, life.pending.variant),
     options: FOCUS.filter((f) => age >= f.from).map((f) => ({ focus: f.id, ...CROSSROADS.options[f.id] })),
   };
 }
@@ -107,7 +130,7 @@ function effectWeight(effect: Partial<Scales> | undefined): number {
   return SCALE_KEYS.reduce((sum, k) => sum + Math.abs(effect[k] ?? 0), 0);
 }
 
-export function startLife(birth: Birth, bias: Scales): Life {
+export function startLife(birth: Birth, bias: Scales, options: LifeOptions = {}): Life {
   const wealthHealth = birth.wealth === 'poor' ? -6 : birth.wealth === 'rich' ? 5 : 0;
   const scales: Scales = {
     health: 62 + wealthHealth + bias.health * 2,
@@ -126,6 +149,9 @@ export function startLife(birth: Birth, bias: Scales): Life {
     scales,
     focus: null,
     used: [],
+    avoid: new Set(options.avoid ?? []),
+    safeAge: options.firstLife ? FIRST_LIFE_SAFE_AGE : -1,
+    opened: false,
     flags: { partner: false, children: 0, grandchildren: false, war: false, famine: false, loss: false, love: false, risky: 0, moves: 0 },
     decisions: 0,
     log: [],
@@ -189,6 +215,7 @@ function eligible(life: Life, id: string, item: { event: GameEvent; russia: bool
   }
   const t = eventTags(id);
   if (t.modern && b.mode === 'russia' && year < 1995) return false;
+  if ((t.land || t.landNo) && landMismatch(id, landOf(b, life.place, year))) return false;
   const has = (need: string): boolean => (need === 'partner' ? life.flags.partner : need === 'child' ? life.flags.children > 0 : false);
   if (t.needs?.some((n) => !has(n))) return false;
   if (t.needsNo?.some((n) => has(n))) return false;
@@ -196,8 +223,11 @@ function eligible(life: Life, id: string, item: { event: GameEvent; russia: bool
 }
 
 function pickEvent(life: Life, decisionOnly: boolean): GameEvent | null {
-  const pool: Array<{ event: GameEvent; russia: boolean }> = [];
-  for (const [id, item] of ALL_EVENTS) if ((!decisionOnly || item.event.decision) && eligible(life, id, item)) pool.push(item);
+  const fits: Array<{ event: GameEvent; russia: boolean }> = [];
+  for (const [id, item] of ALL_EVENTS) if ((!decisionOnly || item.event.decision) && eligible(life, id, item)) fits.push(item);
+  // Прошлая жизнь души не повторяется, пока есть другие события.
+  const fresh = fits.filter((x) => !life.avoid.has(x.event.id));
+  const pool = fresh.length ? fresh : fits;
   if (!pool.length) return null;
   const russiaMode = life.birth.mode === 'russia';
   return weighted(life.rng, pool, (x) => x.event.weight * (x.event.decision ? 2 : 1) * (russiaMode && !x.russia ? 0.5 : 1)).event;
@@ -255,11 +285,29 @@ function quietLine(life: Life): string {
   return pick(life.rng, a < 13 ? q.child : a < 30 ? q.young : a < 60 ? q.adult : q.old);
 }
 
+/** Из вариантов — не те, что были в прошлой жизни души (если есть другие). */
+function pickFresh(life: Life, indexes: number[], key: (i: number) => string): number {
+  const fresh = indexes.filter((i) => !life.avoid.has(key(i)));
+  const i = pick(life.rng, fresh.length ? fresh : indexes);
+  life.used.push(key(i));
+  return i;
+}
+
 /** Один год жизни; ничего не делает, пока ждёт ответа или жизнь закончилась. */
 export function step(life: Life): void {
   if (life.pending || life.death) return;
   life.actions += 'y';
   const a = life.age;
+  // Первый вопрос — в нулевой год, до броска смерти: каждая жизнь успевает хотя бы один выбор.
+  if (!life.opened) {
+    life.opened = true;
+    const first = pickEvent(life, true);
+    if (first) {
+      life.used.push(first.id);
+      life.pending = { kind: 'event', id: first.id, early: true };
+      return;
+    }
+  }
   const year = yearOf(life);
   if (life.birth.mode === 'russia' && a >= 3) {
     const h = hardYear(year);
@@ -271,24 +319,26 @@ export function step(life: Life): void {
   const factor = a === 0 ? 1 : personalFactor(life.scales.health, life.birth.wealth);
   const adjusted = { infancy: parts.infancy, accident: parts.accident * factor, aging: parts.aging * factor, war: parts.war * Math.sqrt(factor), famine: parts.famine * Math.sqrt(factor) };
   const total = Object.values(adjusted).reduce((x, y) => x + y, 0);
-  if (next(life.rng) < 1 - Math.exp(-total)) {
+  if (next(life.rng) < 1 - Math.exp(-total) && a > life.safeAge) {
     life.death = { age: a, cause: causeOf(life, adjusted) };
     return;
   }
   if (PAUSE_AGES.includes(a)) {
-    const options = content.pauses.map((p, i) => ({ p, i })).filter((x) => x.p.age === a);
+    const options = content.pauses.flatMap((p, i) => (p.age === a ? [i] : []));
     if (options.length) {
-      life.pending = { kind: 'pause', index: pick(life.rng, options).i };
+      life.pending = { kind: 'pause', index: pickFresh(life, options, (i) => `pause:${i}`) };
       return;
     }
   }
   if (CROSSROADS.ages.includes(a)) {
-    life.pending = { kind: 'crossroad', age: a };
+    const variants = (CROSSROADS.questions[String(a)] ?? ['']).map((_, i) => i);
+    life.pending = { kind: 'crossroad', age: a, variant: pickFresh(life, variants, (i) => `cross:${a}:${i}`) };
     return;
   }
-  if (!familyYear(life)) {
-    const forceDecision = life.decisions === 0 && a >= 1;
-    const chance = a === 0 ? 0.5 : a <= 40 ? 0.9 : 0.8;
+  // В нулевой год вопрос уже был — дальше только тихий год.
+  if (a > 0 && !familyYear(life)) {
+    const forceDecision = life.decisions === 0;
+    const chance = a <= 40 ? 0.9 : 0.8;
     const event = forceDecision || next(life.rng) < chance ? pickEvent(life, forceDecision) : null;
     if (event) {
       life.used.push(event.id);
@@ -331,6 +381,8 @@ export function choose(life: Life, index: number): void {
     life.decisions += 1;
     life.pending = null;
     log(life, 'decision', e.text, effectWeight(c.effect) + 4 + (tags.gives?.length ? 10 : 0), c.result);
+    // Вопрос нулевого года задан до броска смерти: сам год ещё впереди.
+    if (p.early) return;
   } else if (p.kind === 'crossroad') {
     const option = pendingCrossroad(life)?.options[index];
     if (!option) return;
@@ -339,7 +391,7 @@ export function choose(life: Life, index: number): void {
     addEffect(life.scales, option.effect);
     life.decisions += 1;
     life.pending = null;
-    log(life, 'decision', CROSSROADS.questions[String(p.age)] ?? '', 5, option.result);
+    log(life, 'decision', crossroadQuestion(p.age, p.variant), 5, option.result);
   } else {
     const pause = content.pauses[p.index];
     const answer = pause?.answers[index];
@@ -359,8 +411,8 @@ export function setFocus(life: Life, focus: FocusId): void {
 }
 
 /** Повтор жизни по записи действий: тот же результат до последнего шага. */
-export function replay(birth: Birth, bias: Scales, actions: string): Life {
-  const life = startLife(birth, bias);
+export function replay(birth: Birth, bias: Scales, actions: string, options: LifeOptions = {}): Life {
+  const life = startLife(birth, bias, options);
   for (const ch of actions) {
     if (ch === 'y') step(life);
     else if (CODE_FOCUS[ch]) setFocus(life, CODE_FOCUS[ch]);

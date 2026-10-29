@@ -177,9 +177,9 @@
    "{life}: {place}, {era}",
    "{age} {years}, {life}",
    "{era}, {place}. {life}",
-   "Место: {place}. Время: {era}. Срок: {age} {years}",
+   "{place}, {era}. Срок: {age} {years}",
    "Родной край: {place}, {era}",
-   "{place} и {era}: {age} {years}",
+   "{place}, {era}: {age} {years}",
    "Это была {life}. {place}, {era}",
    "{era}, {age} {years}, {place}: {life}"
   ],
@@ -473,7 +473,7 @@
    "Прожито {age} {years}. {cause}. Главное, что осталось: {soul} {tag}",
    "{place}, {era}: {life}. Интересно, какой будет следующая {tag}",
    "Одна жизнь закончилась: {age} {years}, {place}, {era}. Душа не забудет: {soul} {tag}",
-   "Я {m:увидел|f:увидела} время {era} глазами обычного человека. {place}, {age} {years} {tag}",
+   "Я {m:увидел|f:увидела} жизнь глазами обычного человека: {place}, {era}, {age} {years} {tag}",
    "{cause}. До этого была {life}: {place}, {era}. С собой унесу: {soul} {tag}",
    "Я {m:сыграл|f:сыграла} жизнь на {age} {years}. {place}, {era}. Теперь душа с чертой: {soul} {tag}"
   ],
@@ -630,8 +630,11 @@
    "about": "Об игре"
   },
   "sharedBanner": {
-   "title": "С вами поделились жизнью",
-   "line": "Это чья-то прожитая жизнь, её можно прочитать и родиться самому"
+   "title": "С тобой поделились жизнью",
+   "line": "Родись тем же младенцем и проживи свою версию",
+   "friendTitle": "Друг прожил {age} {years}. Получится дольше?",
+   "friendEnd": "У друга {friend}, у тебя {mine}",
+   "needInclination": "Сначала выбери склонность"
   }
  }
 }

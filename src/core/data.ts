@@ -53,7 +53,7 @@ export const content = {
     epitaphs: WhenText[];
     shareTexts: { death: string[]; birth: string[] };
     cardQuotes: WhenText[];
-    ui: { buttons: Record<string, string>; screens: Record<string, string>; sharedBanner: { title: string; line: string } };
+    ui: { buttons: Record<string, string>; screens: Record<string, string>; sharedBanner: { title: string; line: string; friendTitle: string; friendEnd: string; needInclination: string } };
   },
   world: world as unknown as {
     source: string;

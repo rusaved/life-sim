@@ -43,6 +43,10 @@ export interface EventTags {
   needsNo?: string[];
   gives?: string[];
   choices?: Record<string, string[]>;
+  /** Приметы места, которые нужны событию (все): snow, warm, metro, postSoviet. */
+  land?: string[];
+  /** Приметы, при которых события не бывает. */
+  landNo?: string[];
 }
 
 export interface Country {

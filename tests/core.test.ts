@@ -67,12 +67,39 @@ describe('жизнь', () => {
     expect(again.scales).toEqual(life.scales);
     expect(again.log.length).toBe(life.log.length);
   });
-  it('первое решение приходит в первые годы', () => {
-    for (const seed of ['wabc1234', 'wxyz9876', 'r1a2b3c4']) {
+  it('первый вопрос — в нулевой год, до броска смерти', () => {
+    for (const seed of ['wabc1234', 'wxyz9876', 'r1a2b3c4', 'r0000000']) {
       const life = startLife(makeBirth(seed), ZERO);
-      while (!life.pending && !life.death) step(life);
-      if (!life.death) expect(life.age).toBeLessThanOrEqual(2);
+      step(life);
+      expect(life.death).toBeNull();
+      expect(life.age).toBe(0);
+      expect(pendingEvent(life)?.decision).toBe(true);
+      choose(life, 0);
+      expect(life.age).toBe(0);
     }
+  });
+  it('первая жизнь новой души доживает до паузы в 5 лет', () => {
+    for (let i = 0; i < 60; i++) {
+      const life = startLife(makeBirth(newSeed('russia', () => (i * 0.618 + 0.13) % 1)), ZERO, { firstLife: true });
+      while (!life.death && !(pendingPause(life) && life.age === 5)) {
+        const e = pendingEvent(life);
+        const c = pendingCrossroad(life);
+        if (e) choose(life, 0);
+        else if (c || pendingPause(life)) choose(life, 0);
+        else step(life);
+      }
+      expect(life.death).toBeNull();
+    }
+  });
+  it('прошлая жизнь души не повторяется, повтор с теми же условиями точен', () => {
+    const first = liveToEnd(startLife(makeBirth('wrep0001'), ZERO));
+    const options = { avoid: first.used };
+    const second = liveToEnd(startLife(makeBirth('wrep0002'), ZERO, options));
+    const shared = second.used.filter((id) => first.used.includes(id));
+    expect(shared.length / second.used.length).toBeLessThanOrEqual(0.3);
+    const again = replay(makeBirth('wrep0002'), ZERO, second.actions, options);
+    expect(again.used).toEqual(second.used);
+    expect(again.death).toEqual(second.death);
   });
 });
 
@@ -110,6 +137,13 @@ describe('сохранение', () => {
     expect(back.life?.seed).toBe('w7654321');
     expect(back.sound).toBe(false);
     expect(decodeSave('{broken')).toBeNull();
+  });
+  it('память о прошлой жизни уходит последней, если не помещается', () => {
+    const soul = newSoul();
+    soul.prev = 'w-adult-001 '.repeat(500).trim();
+    const text = encodeSave({ v: 1, t: 1, soul, life: null, mode: 'world', sound: true });
+    expect(text.length).toBeLessThanOrEqual(SAVE_LIMIT);
+    expect(decodeSave(text)).not.toBeNull();
   });
   it('код души', () => {
     const soul = newSoul();

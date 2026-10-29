@@ -1,4 +1,5 @@
-// Что: итог жизни — место и годы, причина одной фразой, эпитафия, шкалы, главные события, «Душа запомнила»; лист «Поделиться» сам.
+// Что: итог жизни — место и годы, причина одной фразой, итог друга (если родились по его ссылке), эпитафия, шкалы, главные события,
+// «Душа запомнила»; лист «Поделиться» сам.
 // Кто зовёт: go.end после смерти на экране жизни.
 // Держать: душа запоминает жизнь ровно один раз (сохранение сразу, текущая жизнь стирается).
 
@@ -40,6 +41,7 @@ export function showEnd(): void {
         h('h1', { style: 'margin-top:8px', text: s.place }),
         h('div', { class: 'years', text: `${fill(ui.lifeYears, { from: s.from, to: s.to })} · ${ageText(s.age)}` }),
         h('p', { class: 'muted', style: 'margin-top:10px', text: s.cause }),
+        app.friendAge !== null ? h('p', { class: 'friend', dataset: { friend: String(app.friendAge) }, text: fill(content.soul.ui.sharedBanner.friendEnd, { friend: app.friendAge, mine: s.age }) }) : null,
         h('p', { class: 'epitaph', 'data-epitaph': '', text: s.epitaph }),
       ),
       h(

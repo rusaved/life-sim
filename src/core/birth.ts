@@ -60,12 +60,12 @@ export function makeBirth(seed: string): Birth {
   return { seed, mode, sex, country: hit.key, place, wealth, year: WORLD_YEAR, era: null, lifeExp, infantMort: row.infantMort, childMort, literacy: row.literacy };
 }
 
-/** «Индия», «Другая страна: Южная Азия», «Россия». */
+/** «Индия», «Где-то в Латинской Америке», «Россия». */
 export function countryName(birth: Birth): string {
   if (birth.mode === 'russia') return content.life.russia;
   if (birth.country.startsWith('region:')) {
     const group = birth.country.slice(7);
-    const region = (content.life.regions as Record<string, string>)[group] ?? group;
+    const region = (content.life.regionsIn as Record<string, string>)[group] ?? group;
     return content.life.otherCountry.replace('{region}', region);
   }
   return content.countryNames[birth.country] ?? birth.country;

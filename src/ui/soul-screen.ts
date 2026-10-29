@@ -37,7 +37,7 @@ export function showSoul(): void {
       h(
         'div',
         { class: 'banner stack', dataset: { shared: '1' } },
-        h('h3', { text: banner.title }),
+        h('h3', { text: app.sharedAge !== null ? fill(banner.friendTitle, agePair(app.sharedAge)) : banner.title }),
         h('p', { class: 'muted small', text: banner.line }),
         h('p', { text: `${placeName(b)} · ${eraName(b)}` }),
       ),
@@ -79,7 +79,7 @@ export function showSoul(): void {
               el.setAttribute('aria-pressed', String(on));
             }
             for (const m of modeButtons) m.disabled = false;
-            if (shared) sameBtn.disabled = false;
+            if (shared) (sameBtn.disabled = false), sameHint.remove();
           },
         },
         h('b', { text: inc.name }),
@@ -109,16 +109,22 @@ export function showSoul(): void {
   const sameBtn = button(content.soul.ui.buttons.bornSame!, 'primary wide', () => {
     sfx.tap();
     const seed = app.sharedSeed!;
+    app.friendAge = app.sharedAge;
     app.sharedSeed = null;
+    app.sharedAge = null;
     const url = new URL(location.href);
     url.searchParams.delete('s');
+    url.searchParams.delete('a');
     history.replaceState(null, '', url);
     go.birth(seedMode(seed), seed);
   });
   sameBtn.dataset.action = 'born-same';
+  // Тусклая «Родиться так же» объясняет себя: сначала склонность новой души.
+  const sameHint = h('p', { class: 'muted small center', dataset: { hint: 'inclination' }, text: content.soul.ui.sharedBanner.needInclination });
   if (shared) {
     sameBtn.disabled = first && !soul.inclination;
     body.append(sameBtn);
+    if (sameBtn.disabled) body.append(sameHint);
   }
 
   const modes: Array<{ mode: Mode; name: string; hint: string }> = [
@@ -137,6 +143,8 @@ export function showSoul(): void {
         onclick: () => {
           sfx.tap();
           app.sharedSeed = null;
+          app.sharedAge = null;
+          app.friendAge = null;
           go.birth(m.mode);
         },
       },

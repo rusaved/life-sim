@@ -24,6 +24,11 @@ export function yearsWord(n: number): string {
   return 'лет';
 }
 
+/** Родительный падеж после «до», «около»: «около 81 года», «около 72 лет». */
+export function yearsGen(n: number): string {
+  return Math.abs(n) % 10 === 1 && Math.abs(n) % 100 !== 11 ? 'года' : 'лет';
+}
+
 /** Возраст словами: «меньше года» для младенцев, иначе «64 года». Пара для шаблонов {age} {years}. */
 export function agePair(age: number): { age: string; years: string } {
   if (age < 1) return { age: 'меньше', years: 'года' };

@@ -1,14 +1,15 @@
-// Что: вход игры — площадка, сохранение (?fresh=1 — с чистого листа), ссылка друга ?s=<seed>, первый экран.
+// Что: вход игры — площадка, сохранение (?fresh=1 — с чистого листа), ссылка друга ?s=<seed>&a=<прожил лет>, первый экран.
 // Кто зовёт: index.html.
 // Держать: до первого экрана ничего тяжёлого — первое решение не позже 20 с от открытия.
 
 import './style.css';
-import { app, freshSave, go, persist } from './app.ts';
+import { app, freshSave, go, parseAge, persist } from './app.ts';
 import { loadPlatform } from './platform/index.ts';
 import { SAVE_KEY, localRemove } from './platform/storage.ts';
 import { decodeSave } from './core/save.ts';
 import { makeBirth } from './core/birth.ts';
 import { replay } from './core/life.ts';
+import { lifeOptions } from './core/soul.ts';
 import { isSeed } from './core/rng.ts';
 import { showSoul } from './ui/soul-screen.ts';
 import { showBirth } from './ui/birth-screen.ts';
@@ -37,16 +38,18 @@ async function boot(): Promise<void> {
   await app.platform.init();
   app.save = (params.get('fresh') === '1' ? null : decodeSave(await app.platform.load())) ?? freshSave();
   app.life = null;
+  app.friendAge = app.save.life?.friend ?? null;
   if (app.save.life) {
     try {
       const s = app.save.life;
-      app.life = replay(makeBirth(s.seed), s.bias, s.actions);
+      app.life = replay(makeBirth(s.seed), s.bias, s.actions, lifeOptions(app.save.soul));
     } catch {
       app.save.life = null;
     }
   }
   const shared = params.get('s');
   app.sharedSeed = isSeed(shared) ? shared : null;
+  app.sharedAge = app.sharedSeed ? parseAge(params.get('a')) : null;
   setSound(app.save.sound);
 
   let back = showSoul;

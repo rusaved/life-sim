@@ -6,9 +6,9 @@
 import { condition, type LifeFacts } from './conditions.ts';
 import { content, type Trait } from './data.ts';
 import { eraName, placeName } from './birth.ts';
-import type { Life } from './life.ts';
+import type { Life, LifeOptions } from './life.ts';
 import { makeRng, pick, weighted, type Rng } from './rng.ts';
-import { agePair, capitalize, fill, gender } from './text.ts';
+import { agePair, capitalize, fill, gender, yearsGen } from './text.ts';
 import { SCALE_KEYS, type Scales } from './types.ts';
 
 export interface LifeLine {
@@ -28,6 +28,8 @@ export interface Soul {
   /** Черты по порядку получения; повтор — черта стала сильнее. */
   traits: string[];
   lives: LifeLine[];
+  /** Что было в прошлой жизни (события, паузы, вопросы перекрёстков) через пробел — следующая жизнь их не повторяет. */
+  prev?: string;
 }
 
 /** Строк о жизнях в сохранении — последние; душа помнит их число полностью в lifeCount. */
@@ -151,10 +153,15 @@ export function lifeCount(soul: Soul): number {
   return soul.traits.length;
 }
 
-/** Душа запоминает жизнь: черта и строка мемориала. */
+/** Душа запоминает жизнь: черта, строка мемориала и что было в этой жизни (чтобы следующая не повторяла). */
 export function rememberLife(soul: Soul, life: Life, s: LifeSummary): Soul {
   const line: LifeLine = { seed: life.birth.seed, place: s.place, era: s.era, age: s.age, trait: s.trait.id, sex: life.birth.sex, lifeShort: s.lifeShort };
-  return { ...soul, traits: [...soul.traits, s.trait.id], lives: [...soul.lives, line].slice(-MAX_LINES) };
+  return { ...soul, traits: [...soul.traits, s.trait.id], lives: [...soul.lives, line].slice(-MAX_LINES), prev: life.used.join(' ') };
+}
+
+/** Что следующая жизнь берёт от души; до смерти душа не меняется, поэтому «Продолжить» повторяет жизнь точно. */
+export function lifeOptions(soul: Soul): LifeOptions {
+  return { firstLife: lifeCount(soul) === 0, avoid: soul.prev ? soul.prev.split(' ') : [] };
 }
 
 /** Строка мемориала: «Россия, село, 1940-е, 71 год». */
@@ -181,7 +188,7 @@ export function deathPost(life: Life, s: LifeSummary, variant: number): string {
   if (s.age < 1) list = list.filter((t) => !t.includes('до {age}'));
   // «до 91 года», «до 87 лет»: после «до» — родительный падеж.
   const tpl = list[variant % list.length]!.replace('до {age} {years}', 'до {age} {gen}');
-  const gen = s.age % 10 === 1 && s.age % 100 !== 11 ? 'года' : 'лет';
+  const gen = yearsGen(s.age);
   const vars = { gen, place: s.place, era: s.era, ...agePair(s.age), cause: s.cause, soul: s.trait.name.toLowerCase(), life: s.lifeShort, trait: s.trait.name, tag: content.brand.hashtag };
   return capitalize(gender(fill(tpl, vars), life.birth.sex));
 }

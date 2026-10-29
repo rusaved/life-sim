@@ -1,10 +1,13 @@
 // `npm run validate:content`: контент цел — события (поля, возраст, варианты, род), условия душ разбираются, метки указывают на события,
+// снег, метро и девятилетка в «Мире» — только с меткой места; мужские формы о герое — только в шаблоне рода;
 // данные: 50+ стран и ≥ 85 % рождений, 7 эпох с источниками; название игры только в content/brand.json.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { content } from '../src/core/data.ts';
 import { condition } from '../src/core/conditions.ts';
 import { SCALE_KEYS } from '../src/core/types.ts';
+import { LAND_KEYS, landWords } from '../src/core/land.ts';
+import { eventTags } from '../src/core/data.ts';
 
 const root = resolve(import.meta.dirname, '..');
 const problems: string[] = [];
@@ -47,6 +50,51 @@ for (const e of events) {
   }
 }
 if (events.length < 120) bad(`событий ${events.length}, нужно 120+`);
+const worldDecisions = content.worldEvents.filter((e) => e.decision).length;
+if (worldDecisions < 120) bad(`вопросов-событий «Мира» ${worldDecisions}, нужно 120+`);
+const babyQuestions = content.worldEvents.filter((e) => e.decision && e.age[0] === 0 && e.where.includes('any') && e.wealth.includes('any') && !eventTags(e.id).modern);
+if (babyQuestions.length < 4) bad(`вопросов нулевого года на все места и эпохи ${babyQuestions.length}, нужно 4–6`);
+
+// Снег, метро, девятилетка, листопад — только с меткой места (события «Мира» идут во все страны).
+for (const e of content.worldEvents) {
+  const t = eventTags(e.id);
+  for (const k of landWords([e.text, ...e.choices.flatMap((c) => [c.label, c.result])].join(' '))) {
+    const ok = k === 'warm!' ? t.landNo?.includes('warm') : t.land?.includes(k);
+    if (!ok) bad(`событие ${e.id}: текст про «${k}», а метки места нет (event-tags.json: ${k === 'warm!' ? 'landNo: warm' : `land: ${k}`})`);
+  }
+  for (const k of [...(t.land ?? []), ...(t.landNo ?? [])]) if (!(LAND_KEYS as readonly string[]).includes(k)) bad(`event-tags ${e.id}: неизвестная примета ${k}`);
+}
+
+// Род героя: мужские формы только в шаблоне {m:…|f:…}; к игроку — без рода.
+const MASC_SHORT = 'сам|рад|готов|должен|уверен|устал|счастлив|нужен|занят|болен|женат|согласен|виноват|обязан|одинок|горд|спокоен|свободен|доволен|влюблён|благодарен|силён|голоден|напуган|один';
+const PRON = '(?:^|[^а-яё])(?:ты|я|тебя|тебе|меня|мне)(?![а-яё])';
+const MASC = [
+  new RegExp(`${PRON}[^.!?,;:]{0,30}?(?:^|[^а-яё])(?:${MASC_SHORT})(?![а-яё])`, 'i'),
+  new RegExp(`(?:^|[^а-яё])(?:${MASC_SHORT})(?![а-яё])[^.!?,;:]{0,12}?${PRON}`, 'i'),
+  new RegExp(`${PRON}\\s+(?:[а-яё]+\\s+){0,2}?[а-яё]+(?:ал|ял|ел|ил|ыл|ул|ёл|шёл|ык|ог|ался|ялся|елся|ился|улся)(?![а-яё])`, 'i'),
+  /[а-яё]+[ую]\s+сам(?![а-яё])/i,
+];
+// Проверено глазами: здесь «один» и «рад» не о герое.
+const MASC_OK = ['болельщик номер один', 'у тебя один карандаш'];
+function checkGender(where: string, text: string): void {
+  const plain = text.replace(GENDER_FULL, '');
+  if (MASC_OK.some((ok) => plain.includes(ok))) return;
+  for (const re of MASC) {
+    const m = plain.match(re);
+    if (m) bad(`${where}: мужская форма вне шаблона {m:…|f:…} — «${m[0].trim()}» в «${text.slice(0, 80)}»`);
+  }
+}
+const SKIP_KEYS = new Set(['note', 'id', 'source', 'sources', 'when', 'trigger', 'words']);
+const walkText = (where: string, x: unknown): void => {
+  if (typeof x === 'string') checkGender(where, x);
+  else if (Array.isArray(x)) x.forEach((v, i) => walkText(`${where}[${i}]`, v));
+  else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) if (!SKIP_KEYS.has(k)) walkText(`${where}.${k}`, v);
+};
+walkText('events/world', content.worldEvents);
+walkText('events/russia', content.russiaEvents);
+walkText('pauses', content.pauses);
+walkText('soul', content.soul);
+walkText('life', content.life);
 for (const id of Object.keys(content.tags)) if (!ids.has(id)) bad(`event-tags: нет события ${id}`);
 
 for (const p of content.pauses) {
@@ -82,7 +130,7 @@ for (const c of w.countries) {
   if (!content.countryNames[c.iso2]) bad(`нет русского названия ${c.iso2}`);
   if (!(c.lifeExp > 40 && c.lifeExp < 90) || !(c.infantMort >= 0)) bad(`данные ${c.iso2}`);
 }
-for (const g of w.otherByRegion) if (!(content.life.regions as Record<string, string>)[g.group.trim()]) bad(`нет названия региона ${g.group}`);
+for (const g of w.otherByRegion) if (!(content.life.regionsIn as Record<string, string>)[g.group.trim()]) bad(`нет названия региона ${g.group} («где-то в …»)`);
 if (content.eras.length !== 7) bad(`эпох ${content.eras.length}, нужно 7`);
 for (const e of content.eras as unknown as Array<{ year: number; sources?: string[] }>) if (!e.sources?.length) bad(`эпоха ${e.year}: нет источников`);
 

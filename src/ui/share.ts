@@ -8,7 +8,7 @@ import { content } from '../core/data.ts';
 import { countryName, eraName, placeName } from '../core/birth.ts';
 import { hashSeed } from '../core/rng.ts';
 import { birthPost, deathPost, lifeCount, traitList, type LifeSummary } from '../core/soul.ts';
-import { ageText, capitalize, fill, gender } from '../core/text.ts';
+import { ageText, capitalize, fill, gender, yearsGen } from '../core/text.ts';
 import { cardBlob, drawCard, type CardData, type CardFormat } from './card.ts';
 import { button, h, toast } from './dom.ts';
 import { sfx } from './sound.ts';
@@ -54,7 +54,7 @@ export function cardData(kind: 'birth' | 'death'): CardData {
     title: gender(ui.bornLine, b.sex),
     subtitle: `${countryName(b)}, ${content.life.placeIn[b.place]}`,
     big: b.era === null ? `${capitalize(eraName(b))}, ${b.year}` : String(b.year),
-    line: `${capitalize(content.life.wealth[b.wealth])}. ${fill(ui.cardBirthLine, { n: Math.round(b.lifeExp) })}`,
+    line: `${capitalize(content.life.wealth[b.wealth])}. ${gender(fill(ui.cardBirthLine, { n: Math.round(b.lifeExp), gen: yearsGen(Math.round(b.lifeExp)) }), b.sex)}`,
     quote: '',
     traits: traits.length ? `${ui.cardTraits}: ${traits.join(' · ')}` : '',
     footer,
@@ -94,7 +94,8 @@ export function openShare(kind: 'birth' | 'death'): void {
   const buttons = content.soul.ui.buttons;
   const platform = app.platform;
   const seed = app.life.birth.seed;
-  const url = seedUrl(seed);
+  // После смерти ссылка несёт прожитые годы: друг увидит, сколько надо прожить.
+  const url = seedUrl(seed, kind === 'death' && lastSummary && app.life.death ? lastSummary.age : undefined);
   const text = postText(kind);
   const data = cardData(kind);
   let format: CardFormat = 'post';

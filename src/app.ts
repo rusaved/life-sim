@@ -15,6 +15,10 @@ export interface AppState {
   life: Life | null;
   /** Зерно из ссылки друга (?s=), пока по нему не родились. */
   sharedSeed: string | null;
+  /** Сколько прожил друг (?a= в ссылке после смерти), пока по ссылке не родились. */
+  sharedAge: number | null;
+  /** Итог друга для текущей жизни, рождённой по его ссылке: после смерти — «у друга 58, у тебя 74». */
+  friendAge: number | null;
 }
 
 export const app = {} as AppState;
@@ -25,7 +29,7 @@ export function freshSave(): SaveData {
 
 export function persist(): void {
   const life = app.life;
-  app.save.life = life && !life.death ? { seed: life.birth.seed, bias: life.bias, actions: life.actions } : null;
+  app.save.life = life && !life.death ? { seed: life.birth.seed, bias: life.bias, actions: life.actions, ...(app.friendAge !== null ? { friend: app.friendAge } : {}) } : null;
   app.save.t = Date.now();
   app.platform.save(encodeSave(app.save));
 }
@@ -35,9 +39,16 @@ export function buildLabel(): string {
   return __BUILD_LABEL__ && new URLSearchParams(location.search).get('build') === '1' ? __BUILD_LABEL__ : '';
 }
 
-/** Ссылка «Родись тем же младенцем». */
-export function seedUrl(seed: string): string {
-  return `${content.brand.siteUrl}?s=${seed}`;
+/** Ссылка «Родись тем же младенцем»; после смерти в ней и прожитые годы — друг увидит, сколько надо прожить. */
+export function seedUrl(seed: string, age?: number): string {
+  return `${content.brand.siteUrl}?s=${seed}${age !== undefined ? `&a=${age}` : ''}`;
+}
+
+/** Прожитые годы из ссылки друга: целое 0–120, иначе null. */
+export function parseAge(text: string | null): number | null {
+  if (!text || !/^\d{1,3}$/.test(text)) return null;
+  const n = Number(text);
+  return n <= 120 ? n : null;
 }
 
 /** Переходы между экранами; заполняет src/main.ts. */
