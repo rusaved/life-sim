@@ -22,20 +22,22 @@ export async function bornNew(page: Page, path = '', mode: 'world' | 'russia' = 
   await expect(page.locator('[data-screen="life"]')).toBeVisible();
 }
 
-/** Жизнь до конца: 16× и первый вариант в каждом решении; возвращает число решений. */
+/** Жизнь до конца: первый вариант в каждом решении, между решениями — «До следующего решения» (через раз 16×); возвращает число решений. */
 export async function liveToEnd(page: Page): Promise<number> {
-  await page.locator('[data-speed="16"]').click();
+  await page.locator('[data-speed="16"]').click({ timeout: 1_000 }).catch(() => {});
   let decisions = 0;
   const end = page.locator('[data-screen="end"]');
-  for (let i = 0; i < 400; i++) {
+  for (let i = 0; i < 600; i++) {
     if (await end.isVisible()) return decisions;
     const choice = page.locator('.ask [data-choice="0"]');
     if (await choice.isVisible()) {
       await choice.click();
       decisions++;
     } else {
-      // Касание скорости между годами: так же ловится миг смерти (раньше таймер итога снимался и экран застывал).
-      await page.locator('[data-speed="16"]').click({ timeout: 2_000 }).catch(() => {});
+      // Касание скорости или «До следующего решения» между годами: так же ловится миг смерти
+      // (раньше таймер итога снимался и экран застывал).
+      const control = page.locator(i % 2 ? '[data-speed="16"]' : '[data-action="skip"]');
+      await control.click({ timeout: 1_000 }).catch(() => {});
       await page.waitForTimeout(40);
     }
   }

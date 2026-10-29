@@ -5,6 +5,7 @@
 
 import type { Platform, ShareResult } from './types.ts';
 import { SAVE_KEY, localGet, localSet, newest } from './storage.ts';
+import { wholeScreen } from './fullscreen.ts';
 
 export interface VkBridgeLike {
   send(method: string, params?: Record<string, unknown>): Promise<unknown>;
@@ -73,6 +74,10 @@ export function createVkPlatform(bridge: VkBridgeLike, appLink: string): Platfor
       call('VKWebAppStorageSet', { key: VK_KEY, value: data }).catch(() => {
         /* без сети: останется локальная копия, следующая запись догонит */
       });
+    },
+    // В живом VK и ОК экраном управляет площадка — не просим; в обычной вкладке (?mock=vk) — как на сайте.
+    async requestFullscreen() {
+      return launchedByPlatform(location.search) ? false : wholeScreen();
     },
     async shareLink(_text, url) {
       if (!bridgeOk) return 'unavailable';

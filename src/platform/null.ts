@@ -4,6 +4,7 @@
 
 import type { Platform } from './types.ts';
 import { SAVE_KEY, localGet, localSet } from './storage.ts';
+import { wholeScreen } from './fullscreen.ts';
 
 export function createNullPlatform(): Platform {
   return {
@@ -15,5 +16,6 @@ export function createNullPlatform(): Platform {
     save(data) {
       localSet(SAVE_KEY, data);
     },
+    requestFullscreen: wholeScreen,
   };
 }

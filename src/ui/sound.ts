@@ -1,6 +1,6 @@
 // Что: тихий звук интерфейса — короткие мягкие тоны WebAudio без файлов: касание, решение, рождение, конец жизни.
 // Кто зовёт: экраны src/ui; выключатель в верхней строке.
-// Держать: AudioContext создаётся только после касания игрока; громкость низкая; выключенный звук не создаёт ничего.
+// Держать: AudioContext создаётся только после касания игрока; громкость низкая; выключенный звук и скрытая вкладка — тишина.
 
 let ctx: AudioContext | null = null;
 let enabled = true;
@@ -15,8 +15,20 @@ export function soundOn(): boolean {
   return enabled;
 }
 
+/** Скрытая вкладка — тишина: звуки не играют, контекст спит до возвращения. */
+let hidden = false;
+export function setHidden(on: boolean): void {
+  hidden = on;
+  const c = ctx;
+  if (!c) return;
+  // Состояние звука видно e2e: data-audio у <html>.
+  const mark = (): void => void (document.documentElement.dataset.audio = c.state);
+  if (on) void c.suspend().then(mark, mark);
+  else if (enabled) void c.resume().then(mark, mark);
+}
+
 function audio(): AudioContext | null {
-  if (!enabled) return null;
+  if (!enabled || hidden) return null;
   try {
     ctx ??= new AudioContext();
     if (ctx.state === 'suspended') void ctx.resume();

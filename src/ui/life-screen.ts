@@ -1,7 +1,7 @@
 // Что: экран жизни — годы идут сами (1× / 4× / 16× и «До следующего решения»), четыре шкалы, лента событий, решения, паузы,
 // перекрёстки и направление года; смерть ведёт к итогу.
 // Кто зовёт: go.life (после свидетельства и «Продолжить»).
-// Держать: на решении время стоит; всё, что сделал игрок, — в life.actions и сохраняется сразу.
+// Держать: на решении и в скрытой вкладке время стоит; всё, что сделал игрок, — в life.actions и сохраняется сразу.
 
 import { app, go, persist } from '../app.ts';
 import { content } from '../core/data.ts';
@@ -177,15 +177,26 @@ export function showLife(): void {
     if (life!.death) return;
     if (timer) clearTimeout(timer);
     timer = 0;
-    if (card) return;
+    if (card || document.hidden) return;
     if (life!.pending) return decisionCard();
     timer = window.setTimeout(tick, skipping ? SKIP_MS : YEAR_MS[speed]);
   }
+
+  // Скрытая вкладка — пауза жизни: годы не идут, пока игрок не вернётся.
+  const onVisibility = (): void => {
+    if (!screen.isConnected) return document.removeEventListener('visibilitychange', onVisibility);
+    if (life!.death) return;
+    if (document.hidden) {
+      if (timer) clearTimeout(timer);
+      timer = 0;
+    } else if (!timer) schedule();
+  };
+  document.addEventListener('visibilitychange', onVisibility);
 
   for (const e of life.log.slice(shown)) feed.append(entry(e));
   shown = life.log.length;
   refresh();
   feed.scrollTop = feed.scrollHeight;
   // Первый год идёт сразу: до первого решения — секунды.
-  timer = window.setTimeout(tick, life.age === 0 ? 400 : YEAR_MS[speed]);
+  if (!document.hidden) timer = window.setTimeout(tick, life.age === 0 ? 400 : YEAR_MS[speed]);
 }

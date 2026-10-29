@@ -1,5 +1,6 @@
 // Что: вход игры — площадка, сохранение (?fresh=1 — с чистого листа), ссылка друга ?s=<seed>&a=<прожил лет>, первый экран.
 // Кто зовёт: index.html.
+// Весь экран по касанию; скрытая вкладка — сохранение и тишина (жизнь ставит на паузу экран жизни).
 // Держать: до первого экрана ничего тяжёлого — первое решение не позже 20 с от открытия.
 
 import './style.css';
@@ -16,7 +17,9 @@ import { showBirth } from './ui/birth-screen.ts';
 import { showLife } from './ui/life-screen.ts';
 import { showEnd } from './ui/end-screen.ts';
 import { showAbout } from './ui/about-screen.ts';
-import { setSound } from './ui/sound.ts';
+import { setHidden, setSound } from './ui/sound.ts';
+
+const WHOLE_SCREEN_EVERY_MS = 1000;
 
 async function boot(): Promise<void> {
   const params = new URLSearchParams(location.search);
@@ -61,7 +64,24 @@ async function boot(): Promise<void> {
     const ret = document.querySelector('[data-screen="end"]') ? () => go.soul() : back === showLife ? showLife : back;
     showAbout(ret);
   };
-  document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && persist());
+  document.addEventListener('visibilitychange', () => {
+    const hidden = document.visibilityState === 'hidden';
+    setHidden(hidden);
+    if (hidden) persist();
+  });
+  // Весь экран по касанию пальцем (браузер даёт только из касания): после выхода и сворачивания — снова, не чаще раза в секунду.
+  let askedAt = -Infinity;
+  window.addEventListener(
+    'pointerup',
+    (ev) => {
+      if (ev.pointerType === 'mouse' || document.fullscreenElement) return;
+      const now = performance.now();
+      if (now - askedAt < WHOLE_SCREEN_EVERY_MS) return;
+      askedAt = now;
+      void app.platform.requestFullscreen();
+    },
+    true,
+  );
   showSoul();
 }
 

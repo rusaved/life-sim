@@ -14,6 +14,8 @@ export interface Platform {
   save(data: string): void;
   /** Своя кнопка «Поделиться» площадки (ссылка и текст); нет — системное меню браузера. */
   shareLink?(text: string, url: string): Promise<ShareResult>;
+  /** Весь экран (только из касания игрока); false — площадка не даёт или браузер отказал. */
+  requestFullscreen(): Promise<boolean>;
   /** История площадки с картинкой 1080×1920 (data:image/png). */
   shareStory?(dataUrl: string): Promise<ShareResult>;
 }
