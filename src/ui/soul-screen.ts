@@ -2,7 +2,7 @@
 // Кто зовёт: go.soul (старт, после смерти, «К душе»).
 // Держать: первая жизнь — два касания до жребия (склонность, мир); «по умолчанию» — последний выбранный мир, он первый.
 
-import { app, go, persist } from '../app.ts';
+import { app, buildLabel, go, persist } from '../app.ts';
 import { makeBirth, eraName, placeName } from '../core/birth.ts';
 import { content } from '../core/data.ts';
 import { seedMode, type Mode } from '../core/rng.ts';
@@ -161,7 +161,7 @@ export function showSoul(): void {
     );
     body.append(codeBox());
   }
-  if (__BUILD_LABEL__) body.append(h('div', { class: 'label', text: __BUILD_LABEL__ }));
+  if (buildLabel()) body.append(h('div', { class: 'label', dataset: { build: '' }, text: buildLabel() }));
   mount(screen);
 }
 

@@ -1,7 +1,8 @@
-// Что: экран «Об игре» — как устроена игра, откуда цифры (источники и годы данных), метка сборки.
+// Что: экран «Об игре» — как устроена игра, откуда цифры (источники и годы данных), метка сборки (по ?build=1).
 // Кто зовёт: кнопка «Об игре» в верхней строке.
 // Держать: источники — те же, что в docs/data-sources.md; ссылки только текстом, без загрузок.
 
+import { buildLabel } from '../app.ts';
 import { content } from '../core/data.ts';
 import { fill } from '../core/text.ts';
 import { ICONS, h, iconButton, mount } from './dom.ts';
@@ -24,7 +25,7 @@ export function showAbout(back: () => void): void {
       h('p', { text: fill(a.worldSource, { years }) }),
       h('p', { class: 'muted', text: fill(a.countries, { n: w.countries.length, share: Math.round(w.topShare * 100) }) }),
       h('p', { text: a.russiaSource }),
-      __BUILD_LABEL__ ? h('p', { class: 'muted small', style: 'margin-top:18px', text: fill(a.build, { label: __BUILD_LABEL__ }) }) : null,
+      buildLabel() ? h('p', { class: 'muted small', style: 'margin-top:18px', dataset: { build: '' }, text: fill(a.build, { label: buildLabel() }) }) : null,
     ),
   );
   mount(screen);

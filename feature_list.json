@@ -101,7 +101,7 @@
       "milestone": "LS2",
       "name": "Метка сборки",
       "check": "на публичном сайте не видна; по ?build=1 видна на сайте и в vk/",
-      "passes": false
+      "passes": true
     },
     {
       "id": "LS2-06",

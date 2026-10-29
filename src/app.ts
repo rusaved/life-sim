@@ -30,6 +30,11 @@ export function persist(): void {
   app.platform.save(encodeSave(app.save));
 }
 
+/** Метка сборки: зашита в сборки Pages и VK, видна только по ?build=1 (игроку она ни к чему). */
+export function buildLabel(): string {
+  return __BUILD_LABEL__ && new URLSearchParams(location.search).get('build') === '1' ? __BUILD_LABEL__ : '';
+}
+
 /** Ссылка «Родись тем же младенцем». */
 export function seedUrl(seed: string): string {
   return `${content.brand.siteUrl}?s=${seed}`;

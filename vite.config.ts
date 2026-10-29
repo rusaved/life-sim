@@ -4,12 +4,13 @@ import { resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 
 // Режимы сборки: development и pages — свой сайт (площадка null), vk и vk-dev — ВКонтакте и Одноклассники.
+// Метка сборки зашита в pages и vk, а видна только по ?build=1.
 type Platform = 'null' | 'vk';
 const MODES: Record<string, { platform: Platform; label: boolean }> = {
   development: { platform: 'null', label: false },
   production: { platform: 'null', label: false },
   pages: { platform: 'null', label: true },
-  vk: { platform: 'vk', label: false },
+  vk: { platform: 'vk', label: true },
   'vk-dev': { platform: 'vk', label: false },
 };
 
