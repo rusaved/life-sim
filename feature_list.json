@@ -129,7 +129,7 @@
       "milestone": "LS2",
       "name": "Тесты и итог",
       "check": "e2e и боты по задачам; плейтестер 10 минут стоя и 5 минут боком на 815×290 без «2»; полный verify; итог в progress.md и main",
-      "passes": false
+      "passes": true
     }
   ]
 }

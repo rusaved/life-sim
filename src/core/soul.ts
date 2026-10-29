@@ -186,6 +186,8 @@ export function traitList(soul: Soul): Array<{ trait: Trait; count: number }> {
 export function deathPost(life: Life, s: LifeSummary, variant: number): string {
   let list = content.soul.shareTexts.death;
   if (s.age < 1) list = list.filter((t) => !t.includes('до {age}'));
+  // Младенцу не подходит «целая жизнь».
+  if (s.age < 5) list = list.filter((t) => !t.includes('Целая жизнь'));
   // «до 91 года», «до 87 лет»: после «до» — родительный падеж.
   const tpl = list[variant % list.length]!.replace('до {age} {years}', 'до {age} {gen}');
   const gen = yearsGen(s.age);

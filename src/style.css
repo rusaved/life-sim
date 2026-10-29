@@ -726,7 +726,7 @@ textarea {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 28px;
+  top: max(16px, env(safe-area-inset-top));
   transform: translateX(-50%);
   max-width: calc(100% - 32px);
   background: #2d2720;
